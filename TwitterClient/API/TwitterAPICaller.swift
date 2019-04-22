@@ -17,6 +17,18 @@ class TwitterAPICaller: BDBOAuth1SessionManager {
     var loginSuccess: (() -> ())?
     var loginFailure: ((Error) -> ())?
     
+    func handleOpenUrl(url: URL) {
+        // request token comes from url
+        let requestToken = BDBOAuth1Credential(queryString: url.query)
+        TwitterAPICaller.client?.fetchAccessToken(withPath: "oauth/access_token", method: "POST", requestToken: requestToken, success: { (accessToken: BDBOAuth1Credential!) in
+            print("Got the access token")
+            self.loginSuccess?()
+        }, failure: { (error: Error!) in
+            print("Error receiving token")
+            self.loginFailure?(error)
+        })
+    }
+    
     func login(url: String, success: @escaping () -> (), failure: @escaping (Error) -> ()){
         loginSuccess = success
         loginFailure = failure
